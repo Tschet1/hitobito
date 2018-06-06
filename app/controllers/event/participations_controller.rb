@@ -119,8 +119,16 @@ class Event::ParticipationsController < CrudController
   end
 
   def render_tabular_in_background(format)
-    Export::EventParticipationsExportJob.new(format, current_person.id, event.id, params).enqueue!
-    flash[:notice] = translate(:export_enqueued, email: current_person.email)
+    filename = AsyncDownloadFile.create_name('event_participation_export', current_person.id)
+    AsyncDownloadCookie.new(cookies, filename, format).set
+
+    Export::EventParticipationsExportJob.new(format,
+                                             event.id,
+                                             current_person.id,
+                                             params,
+                                             filename).enqueue!
+
+    flash[:notice] = translate(:export_enqueued)
   end
 
   def check_preconditions

@@ -51,11 +51,13 @@ class SubscriptionsController < CrudController
   end
 
   def render_tabular_in_background(format)
+    filename = AsyncDownloadFile.create_name("subscriptions_#{mailing_list.id}", current_person.id)
+    AsyncDownloadCookie.new(cookies, filename, format).set
     Export::SubscriptionsJob.new(format,
                                  mailing_list.id,
-                                 current_person.id,
-                                 params[:household]).enqueue!
-    flash[:notice] = translate(:export_enqueued, email: current_person.email)
+                                 params[:household],
+                                 filename).enqueue!
+    flash[:notice] = translate(:export_enqueued)
   end
 
   def render_tabular(format, people)

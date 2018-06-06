@@ -9,22 +9,17 @@ class Export::PeopleExportJob < Export::ExportBaseJob
 
   self.parameters = PARAMETERS + [:full, :person_filter, :household]
 
-  def initialize(format, full, user_id, person_filter, household)
+  def initialize(format, full, person_filter, household, filename)
     super()
     @format = format
     @full = full
     @exporter = exporter
-    @user_id = user_id
-    @tempfile_name = "people-#{format}-zip"
+    @filename = filename
     @person_filter = person_filter
     @household = household
   end
 
   private
-
-  def send_mail(recipient, file, format)
-    Export::PeopleExportMailer.completed(recipient, file, format).deliver_now
-  end
 
   def entries
     entries = @person_filter.entries

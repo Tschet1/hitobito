@@ -1,28 +1,24 @@
 # encoding: utf-8
 
-#  Copyright (c) 2017, Pfadibewegung Schweiz. This file is part of
+#  Copyright (c) 2018, Pfadibewegung Schweiz. This file is part of
 #  hitobito and licensed under the Affero General Public License version 3
 #  or later. See the COPYING file at the top-level directory or at
 #  https://github.com/hitobito/hitobito.
 
 class Export::EventParticipationsExportJob < Export::ExportBaseJob
 
-  self.parameters = PARAMETERS + [:event_id, :controller_params]
+  self.parameters = PARAMETERS + [:event_id, :user_id, :controller_params]
 
-  def initialize(format, user_id, event_id, controller_params)
+  def initialize(format, event_id, user_id, controller_params, filename)
     super()
     @format = format
     @user_id = user_id
-    @tempfile_name = 'event-participations-export'
+    @filename = filename
     @event_id = event_id
     @controller_params = controller_params
   end
 
   private
-
-  def send_mail(recipient, file, format)
-    Export::EventParticipationsExportMailer.completed(recipient, file, format).deliver_now
-  end
 
   def entries
     @entries ||= Event::ParticipationFilter.new(Event.find(@event_id),
